@@ -287,11 +287,18 @@ if ($mailboxList.count -gt 0) {
             <td>$($mailbox.'Email Address')</td>`
             <td>$('{0:dd-MMM-yyyy}' -f $mailbox.'Mailbox Created Date')</td>`
             <td>$($mailbox.Excluded)</td></tr>"
-            if (!$ListOnly) {
-                Set-Mailbox -Identity $mailbox.'User ID' -LitigationHoldEnabled $true -WarningAction SilentlyContinue
-            }
+            
         }
     }
+	## Litigation command
+	if (!$ListOnly) {
+		$notexcludeditems = $mailboxlist | where-object 'excluded' -eq $null
+		foreach ($mailboxex in $notexcludeditems)
+			{
+				Write-Host Setting litigation hold on mailbox $($mailboxex.'User ID')
+				Set-Mailbox -Identity $mailboxex.'User ID' -LitigationHoldEnabled $true -WarningAction SilentlyContinue
+			}
+	}
 
     ## If CSV File Report
     if ($reportType -eq 'CSV') {
@@ -332,4 +339,3 @@ if ($mailboxList.count -gt 0) {
         Send-MailMessage @mailParams
     }
 }
-
